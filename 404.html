@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 Not Found</title>
+  <style>
+    /* Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0d1117, #1e1e2e);
+      font-family: "Inter", sans-serif;
+      overflow: hidden;
+    }
+
+    /* Glassy container */
+    .card {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    /* Title */
+    h1 {
+      font-size: 5rem;
+      color: #ffffff;
+      text-shadow: 0 0 15px rgba(88, 166, 255, 0.8);
+      animation: pulse 3s infinite alternate;
+    }
+
+    p {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #c9d1d9;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 12px;
+      background: rgba(88, 166, 255, 0.2);
+      color: #58a6ff;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+    a:hover {
+      background: rgba(88, 166, 255, 0.4);
+      color: #ffffff;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      from {
+        text-shadow: 0 0 15px rgba(88, 166, 255, 0.8);
+      }
+      to {
+        text-shadow: 0 0 30px rgba(88, 166, 255, 1);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(88, 166, 255, 0.6);
+      animation: float 10s infinite linear;
+    }
+
+    @keyframes float {
+      from { transform: translateY(100vh) translateX(0); opacity: 0; }
+      25%  { opacity: 1; }
+      to   { transform: translateY(-20vh) translateX(50vw); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating particles -->
+  <div class="particle" style="left:10%; animation-delay:0s;"></div>
+  <div class="particle" style="left:30%; animation-delay:2s;"></div>
+  <div class="particle" style="left:60%; animation-delay:4s;"></div>
+  <div class="particle" style="left:80%; animation-delay:6s;"></div>
+
+  <!-- 404 card -->
+  <div class="card">
+    <h1>404</h1>
+    <p>Oops! The page you are looking for is not avalable</p>
+    <a href="https://hsr-projects.github.io/hsrprojects.org">⬅ Return Home</a>
+  </div>
+</body>
+</html>
