@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HyprSong Library</title>
+<style>
+:root {
+  --bg1:#071023; --bg2:#071b2a;
+  --accent1:#7c3aed; --accent2:#06b6d4; --accent3:#6ee7b7;
+  --muted:#9fb0bd; --glass:rgba(255,255,255,0.04);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,sans-serif;}
+body{background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#eaf6ff;height:100vh;}
+.vibes{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.g{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.55;}
+.g.a{width:520px;height:520px;background:radial-gradient(circle at 30% 30%, var(--accent3),transparent 35%);left:-8%;top:10%;}
+.g.b{width:660px;height:660px;background:radial-gradient(circle at 20% 80%, var(--accent1),transparent 35%);right:-12%;bottom:-6%;}
+.g.c{width:420px;height:420px;background:radial-gradient(circle at 70% 20%, var(--accent2),transparent 35%);left:20%;bottom:-8%;}
+.container{position:relative;z-index:1;max-width:1000px;margin:20px auto;display:grid;grid-template-columns:300px 1fr;gap:20px;}
+.panel{background:rgba(255,255,255,0.02);padding:16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(10px);}
+.library-list{display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;}
+.song-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);cursor:pointer;transition:0.2s;}
+.song-item:hover{background:rgba(255,255,255,0.03);}
+.thumb{width:50px;height:50px;border-radius:8px;background:#132833;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.track-info{display:flex;flex-direction:column;gap:6px;}
+.now-player{display:flex;flex-direction:column;gap:10px;}
+.controls{display:flex;gap:10px;align-items:center;margin-top:10px;}
+.progress{height:8px;background:rgba(255,255,255,0.03);border-radius:8px;position:relative;width:100%;cursor:pointer;}
+.progress .bar{height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:0%;border-radius:8px;}
+
+/* Hyprland-style buttons */
+button{
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: #eaf6ff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 8px rgba(124,58,237,0.5);
+}
+button:hover{
+  background: rgba(124,58,237,0.15);
+  box-shadow: 0 0 14px rgba(124,58,237,0.8);
+}
+button:active{
+  transform: scale(0.95);
+  box-shadow: 0 0 6px rgba(124,58,237,0.6);
+}
+input[type=range]{flex:1;}
+</style>
+</head>
+<body>
+<div class="vibes" aria-hidden="true">
+  <div class="g a"></div>
+  <div class="g b"></div>
+  <div class="g c"></div>
+</div>
+
+<div class="container">
+  <aside class="panel">
+    <h2>Library</h2>
+    <div id="library" class="library-list"></div>
+  </aside>
+  
+  <section class="panel now-player">
+    <h2 id="nowTitle">No track</h2>
+    <div id="nowArtist" style="color:var(--muted);">—</div>
+    <div style="width:200px;height:200px;background:#062433;border-radius:12px;margin:10px 0;" id="nowCover"></div>
+    
+    <div class="progress" id="progress"><div class="bar" id="progressBar"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.85rem;"><span id="curTime">0:00</span><span id="durTime">0:00</span></div>
+    
+    <div class="controls">
+      <button id="prevBtn">⟸</button>
+      <button id="playBtn">▶</button>
+      <button id="nextBtn">⟹</button>
+      <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7">
+    </div>
+  </section>
+</div>
+
+<script>
+const SONGS = [
+  { title: 'Acoustic Breeze', artist: 'Benjamin Tissot', cover: 'https://www.bensound.com/bensound-img/acousticbreeze.jpg', file: 'https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3' },
+  { title: 'Sunny', artist: 'Benjamin Tissot', cover: 'https://www.bensound.com/bensound-img/sunny.jpg', file: 'https://www.bensound.com/bensound-music/bensound-sunny.mp3' },
+  { title: 'Creative Minds', artist: 'Benjamin Tissot', cover: 'https://www.bensound.com/bensound-img/creativeminds.jpg', file: 'https://www.bensound.com/bensound-music/bensound-creativeminds.mp3' },
+  { title: 'Going Higher', artist: 'Benjamin Tissot', cover: 'https://www.bensound.com/bensound-img/goinghigher.jpg', file: 'https://www.bensound.com/bensound-music/bensound-goinghigher.mp3' },
+  { title: 'Energy', artist: 'Benjamin Tissot', cover: 'https://www.bensound.com/bensound-img/energy.jpg', file: 'https://www.bensound.com/bensound-music/bensound-energy.mp3' },
+  { title: 'Rook b1 chess song', artist: 'PieChess', cover: 'rook.png', file: 'rook.mp3' },
+  { title: 'The Chess Song | A How to Play Chess Rap', artist: 'NumberRock', cover: 'chess_rap.png', file: 'rap.mp3' }
+];
+
+const libraryEl = document.getElementById('library');
+const nowTitle = document.getElementById('nowTitle');
+const nowArtist = document.getElementById('nowArtist');
+const nowCover = document.getElementById('nowCover');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progress = document.getElementById('progress');
+const progressBar = document.getElementById('progressBar');
+const curTime = document.getElementById('curTime');
+const durTime = document.getElementById('durTime');
+const vol = document.getElementById('vol');
+
+let audio = new Audio();
+let currentIndex = -1;
+
+function formatTime(sec){ const m=Math.floor(sec/60); const s=Math.floor(sec%60); return `${m}:${s.toString().padStart(2,'0')}`; }
+
+function renderLibrary(){
+  libraryEl.innerHTML='';
+  SONGS.forEach((song,i)=>{
+    const item = document.createElement('div'); item.className='song-item';
+    item.innerHTML=`<div class="thumb">${song.title.charAt(0).toUpperCase()}</div>
+      <div class="track-info"><strong>${song.title}</strong><br><span style="color:var(--muted);">${song.artist}</span></div>`;
+    item.addEventListener('click',()=>playIndex(i));
+    libraryEl.appendChild(item);
+  });
+}
+
+function playIndex(i){
+  if(i<0||i>=SONGS.length) return;
+  currentIndex=i;
+  audio.src=SONGS[i].file;
+  audio.play();
+  nowTitle.textContent=SONGS[i].title;
+  nowArtist.textContent=SONGS[i].artist;
+  nowCover.style.backgroundImage=`url('${SONGS[i].cover}')`;
+  playBtn.textContent='⏸';
+}
+
+playBtn.addEventListener('click',()=>{
+  if(audio.paused){ audio.play(); playBtn.textContent='⏸'; } else { audio.pause(); playBtn.textContent='▶'; }
+});
+
+prevBtn.addEventListener('click',()=>{ playIndex((currentIndex-1+SONGS.length)%SONGS.length); });
+nextBtn.addEventListener('click',()=>{ playIndex((currentIndex+1)%SONGS.length); });
+
+audio.addEventListener('timeupdate',()=>{
+  const pct = audio.currentTime/(audio.duration||1)*100;
+  progressBar.style.width=pct+'%';
+  curTime.textContent=formatTime(audio.currentTime);
+  durTime.textContent=formatTime(audio.duration||0);
+});
+
+progress.addEventListener('click',(e)=>{
+  const pct = (e.offsetX/progress.offsetWidth);
+  audio.currentTime=audio.duration*pct;
+});
+
+vol.addEventListener('input',()=>{ audio.volume=vol.value; });
+
+renderLibrary();
+</script>
+</body>
+</html>
