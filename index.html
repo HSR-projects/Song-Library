@@ -158,5 +158,13 @@ vol.addEventListener('input',()=>{ audio.volume=vol.value; });
 
 renderLibrary();
 </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(() => {
+    console.log('Service Worker registered.');
+  });
+}
+</script>
+
 </body>
 </html>
